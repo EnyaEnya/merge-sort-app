@@ -8,14 +8,14 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.stream.Stream;
 
-public class Sort {
+public class StringSort {
 
-    public static void merge(File firstFile, File secondFile, File output) throws IOException {
+    private void merge(File firstFile, File secondFile, File output) throws IOException {
         long len_1 = countString(firstFile), len_2 = countString(secondFile);
         long a = 0, b = 0, len = len_1 + len_2;
         for (long i = 0; i < len; i++) {
             if (b < len_2 && a < len_1) {
-                if (getSpecificString(firstFile, a).compareTo(getSpecificString(secondFile, b)) == 1) {
+                if (compare(getSpecificString(firstFile, a), getSpecificString(secondFile, b))) {
                     writeToFile(output, getSpecificString(secondFile, b));
                     b++;
                 } else {
@@ -32,7 +32,7 @@ public class Sort {
         }
     }
 
-    public static void createOutputFile(String firstFilePath, String secondFilePath, String outputPath) throws IOException {
+    public void createOutputFile(String firstFilePath, String secondFilePath, String outputPath) throws IOException {
         File firstFile = new File(firstFilePath);
         File secondFile = new File(secondFilePath);
         File outputFile = new File(outputPath);
@@ -45,13 +45,13 @@ public class Sort {
         merge(firstFile, secondFile, outputFile);
     }
 
-    public static long countString(File file) throws IOException {
+    private long countString(File file) throws IOException {
         try (Stream<String> lines = Files.lines(file.toPath())) {
             return lines.count();
         }
     }
 
-    public static String getSpecificString(File file, long stringNumber) throws IOException {
+    private String getSpecificString(File file, long stringNumber) throws IOException {
         String specificLine;
         try (Stream<String> lines = Files.lines(file.toPath())) {
             specificLine = lines.skip(stringNumber).findFirst().orElseThrow(RuntimeException::new); //todo custom exception
@@ -60,13 +60,17 @@ public class Sort {
     }
 
 
-    public static void writeToFile(File file, String recordedValue) {
+    private void writeToFile(File file, String recordedValue) {
         String newRecordedValue = recordedValue + "\n";
         try {
             Files.write(file.toPath(), newRecordedValue.getBytes(), StandardOpenOption.APPEND);
         } catch (IOException e) {
             System.out.println(e);
         }
+    }
+
+    protected boolean compare(String first, String second) {
+        return first.compareTo(second) > 0;
     }
 
 }
