@@ -10,12 +10,18 @@ import java.util.stream.Stream;
 
 public class StringSort {
 
-    private void merge(File firstFile, File secondFile, File output) throws IOException {
+    private boolean ascending;
+
+    public StringSort(boolean ascending) {
+        this.ascending = ascending;
+    }
+
+    private void merge(File output, File firstFile, File secondFile) throws IOException {
         long len_1 = countString(firstFile), len_2 = countString(secondFile);
         long a = 0, b = 0, len = len_1 + len_2;
         for (long i = 0; i < len; i++) {
             if (b < len_2 && a < len_1) {
-                if (compare(getSpecificString(firstFile, a), getSpecificString(secondFile, b))) {
+                if (compareWithDirection(firstFile, a, secondFile, b)) {
                     writeToFile(output, getSpecificString(secondFile, b));
                     b++;
                 } else {
@@ -32,17 +38,17 @@ public class StringSort {
         }
     }
 
-    public void createOutputFile(String firstFilePath, String secondFilePath, String outputPath) throws IOException {
+    public void createOutputFile(String outputPath, String firstFilePath, String secondFilePath) throws IOException {
+        File outputFile = new File(outputPath);
         File firstFile = new File(firstFilePath);
         File secondFile = new File(secondFilePath);
-        File outputFile = new File(outputPath);
         try {
             FileUtils.touch(outputFile);
             FileUtils.write(outputFile, "", Charset.defaultCharset());  //todo check encoding
         } catch (Exception e) {
             e.printStackTrace();
         }
-        merge(firstFile, secondFile, outputFile);
+        merge(outputFile, firstFile, secondFile);
     }
 
     private long countString(File file) throws IOException {
@@ -67,6 +73,10 @@ public class StringSort {
         } catch (IOException e) {
             System.out.println(e);
         }
+    }
+
+    private boolean compareWithDirection(File firstFile, Long index1, File secondFile, Long index2) throws IOException {
+        return compare(getSpecificString(firstFile, index1), getSpecificString(secondFile, index2)) == ascending;
     }
 
     protected boolean compare(String first, String second) {

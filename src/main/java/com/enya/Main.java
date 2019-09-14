@@ -1,15 +1,16 @@
 package com.enya;
 
-import java.io.IOException;
+import org.apache.commons.cli.ParseException;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws ParseException {
 
-        NumberSort sort = new NumberSort();
+        ArgParser argParser = new ArgParser();
 
-        sort.createOutputFile("input1.txt",
-                "input2.txt", "output.txt");
+        SortParams sortParams = argParser.parseArgs(args);
+
+        System.out.println(sortParams);
 
     }
 
