@@ -10,9 +10,15 @@ public class Main {
 
         SortParams sortParams = argParser.parseArgs(args);
 
-        NumberSort numberSort = new NumberSort(sortParams.isAscendingDirection());
+        StringSort sortInstance;
 
-        numberSort.mergeFiles(sortParams.getFileList(), sortParams.getOutputFile());
+        if (sortParams.isStringType()) {
+            sortInstance = new StringSort(sortParams.isAscendingDirection());
+        } else {
+            sortInstance = new NumberSort(sortParams.isAscendingDirection());
+        }
+
+        sortInstance.mergeFiles(sortParams.getFileList(), sortParams.getOutputFile());
 
     }
 
