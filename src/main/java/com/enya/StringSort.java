@@ -2,10 +2,11 @@ package com.enya;
 
 import org.apache.commons.io.FileUtils;
 
-import java.io.*;
-import java.nio.charset.Charset;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class StringSort {
@@ -16,39 +17,57 @@ public class StringSort {
         this.ascending = ascending;
     }
 
-    private void merge(File output, File firstFile, File secondFile) throws IOException {
+    public void mergeFiles(List<File> fileList, File outputFile) {
+        fileList.forEach((file) -> {
+            try {
+                mergeWithAcc(file, outputFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    protected boolean compare(String first, String second) {
+        return first.compareTo(second) > 0;
+    }
+
+    private void merge(File firstFile, File secondFile, File outputFile) throws IOException {
         long len_1 = countString(firstFile), len_2 = countString(secondFile);
         long a = 0, b = 0, len = len_1 + len_2;
         for (long i = 0; i < len; i++) {
             if (b < len_2 && a < len_1) {
                 if (compareWithDirection(firstFile, a, secondFile, b)) {
-                    writeToFile(output, getSpecificString(secondFile, b));
+                    writeToFile(outputFile, getSpecificString(secondFile, b));
                     b++;
                 } else {
-                    writeToFile(output, getSpecificString(firstFile, a));
+                    writeToFile(outputFile, getSpecificString(firstFile, a));
                     a++;
                 }
             } else if (b < len_2) {
-                writeToFile(output, getSpecificString(secondFile, b));
+                writeToFile(outputFile, getSpecificString(secondFile, b));
                 b++;
             } else {
-                writeToFile(output, getSpecificString(firstFile, a));
+                writeToFile(outputFile, getSpecificString(firstFile, a));
                 a++;
             }
         }
     }
 
-    public void createOutputFile(String outputPath, String firstFilePath, String secondFilePath) throws IOException {
-        File outputFile = new File(outputPath);
-        File firstFile = new File(firstFilePath);
-        File secondFile = new File(secondFilePath);
+    private void mergeWithAcc(File file, File acc) throws IOException {
+        File tempFile = createTempFile();
+        merge(file, acc, tempFile);
+        FileUtils.copyFile(tempFile, acc);
+        FileUtils.deleteQuietly(tempFile);
+    }
+
+    private File createTempFile() {
+        File tempFile = new File("temp.txt");
         try {
-            FileUtils.touch(outputFile);
-            FileUtils.write(outputFile, "", Charset.defaultCharset());  //todo check encoding
+            FileUtils.touch(tempFile);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        merge(outputFile, firstFile, secondFile);
+        return tempFile;
     }
 
     private long countString(File file) throws IOException {
@@ -65,7 +84,6 @@ public class StringSort {
         return specificLine;
     }
 
-
     private void writeToFile(File file, String recordedValue) {
         String newRecordedValue = recordedValue + "\n";
         try {
@@ -79,10 +97,4 @@ public class StringSort {
         return compare(getSpecificString(firstFile, index1), getSpecificString(secondFile, index2)) == ascending;
     }
 
-    protected boolean compare(String first, String second) {
-        return first.compareTo(second) > 0;
-    }
-
 }
-
-

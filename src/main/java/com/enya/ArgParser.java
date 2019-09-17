@@ -73,6 +73,4 @@ public class ArgParser {
         return fileList;
     }
 
-
-
 }

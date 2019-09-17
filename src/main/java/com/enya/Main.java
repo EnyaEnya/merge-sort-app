@@ -10,7 +10,9 @@ public class Main {
 
         SortParams sortParams = argParser.parseArgs(args);
 
-        System.out.println(sortParams);
+        NumberSort numberSort = new NumberSort(sortParams.isAscendingDirection());
+
+        numberSort.mergeFiles(sortParams.getFileList(), sortParams.getOutputFile());
 
     }
 
