@@ -6,25 +6,41 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 public class StringSort {
 
     private boolean ascending;
 
+    private List<File> tempFiles;
+
     public StringSort(boolean ascending) {
         this.ascending = ascending;
+        this.tempFiles = new ArrayList<>();
     }
 
     public void mergeFiles(List<File> fileList, File outputFile) {
-        fileList.forEach((file) -> {
+        fileList.stream().map(file -> {
+            File newFile = new File(UUID.randomUUID().toString() + ".txt");
             try {
-                mergeWithAcc(file, outputFile);
+                FileUtils.touch(newFile);
+                FileUtils.copyFile(file, newFile);
+                return newFile;
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException();
+            }
+        }).peek(file -> {
+            try {
+                File sortedFile = sort(file);
+                mergeWithAcc(sortedFile, outputFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        });
+        }).forEach(FileUtils::deleteQuietly);
     }
 
     protected boolean compare(String first, String second) {
@@ -53,11 +69,15 @@ public class StringSort {
         }
     }
 
-    private void mergeWithAcc(File file, File acc) throws IOException {
+    private File mergeWithAcc(File file, File acc) throws IOException {
         File tempFile = createTempFile();
-        merge(file, acc, tempFile);
-        FileUtils.copyFile(tempFile, acc);
-        FileUtils.deleteQuietly(tempFile);
+        try {
+            merge(file, acc, tempFile);
+            FileUtils.copyFile(tempFile, acc);
+            return acc;
+        } finally {
+            FileUtils.deleteQuietly(tempFile);
+        }
     }
 
     private File createTempFile() {
@@ -68,6 +88,41 @@ public class StringSort {
             e.printStackTrace();
         }
         return tempFile;
+    }
+
+    private File sort(File file) {
+        try {
+            FileUtils.copyFile(recursiveSort(file), file);
+            return file;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException();
+        } finally {
+            tempFiles.forEach(FileUtils::deleteQuietly);
+            tempFiles.clear();
+        }
+    }
+
+    private File recursiveSort(File file) throws IOException {
+        File beforeMiddle = null;
+        File afterMiddle = null;
+        long len = countString(file);
+        if (len < 2) return file;
+        long middle = len / 2;
+        beforeMiddle = new File(UUID.randomUUID().toString() + ".txt");
+        afterMiddle = new File(UUID.randomUUID().toString() + ".txt");
+        tempFiles.add(beforeMiddle);
+        tempFiles.add(afterMiddle);
+        FileUtils.touch(beforeMiddle);
+        FileUtils.touch(afterMiddle);
+        for (long i = 0; i < middle; i++) {
+            FileUtils.writeStringToFile(beforeMiddle, getSpecificString(file, i) + "\n", true);
+        }
+        for (long j = middle; j < len; j++) {
+            FileUtils.writeStringToFile(afterMiddle, getSpecificString(file, j) + "\n", true);
+        }
+        return mergeWithAcc(recursiveSort(beforeMiddle),
+                recursiveSort(afterMiddle));
     }
 
     private long countString(File file) throws IOException {

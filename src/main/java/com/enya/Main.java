@@ -2,9 +2,11 @@ package com.enya;
 
 import org.apache.commons.cli.ParseException;
 
+import java.io.IOException;
+
 public class Main {
 
-    public static void main(String[] args) throws ParseException {
+    public static void main(String[] args) throws ParseException, IOException {
 
         ArgParser argParser = new ArgParser();
 
@@ -19,6 +21,7 @@ public class Main {
         }
 
         sortInstance.mergeFiles(sortParams.getFileList(), sortParams.getOutputFile());
+
 
     }
 
