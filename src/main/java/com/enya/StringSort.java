@@ -27,7 +27,12 @@ public class StringSort {
             File newFile = new File(UUID.randomUUID().toString() + ".txt");
             try {
                 FileUtils.touch(newFile);
-                FileUtils.copyFile(file, newFile);
+                if (!isSorted(file)) {
+                    File sortedFile = sort(file);
+                    FileUtils.copyFile(sortedFile, newFile);
+                } else {
+                    FileUtils.copyFile(file, newFile);
+                }
                 return newFile;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -35,16 +40,28 @@ public class StringSort {
             }
         }).peek(file -> {
             try {
-                File sortedFile = sort(file);
-                mergeWithAcc(sortedFile, outputFile);
+                mergeWithAcc(file, outputFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }).forEach(FileUtils::deleteQuietly);
     }
 
-    protected boolean compare(String first, String second) {
-        return first.compareTo(second) > 0;
+    private boolean isSorted(File file) throws IOException {
+        boolean sorted = false;
+        long length = countString(file);
+        for (long i = 0; i < length - 1; i++) {
+            if (compareWithDirection(file, i,file, i + 1)) {
+                sorted = true;
+            } else {
+                return false;
+            }
+        }
+        return sorted;
+    }
+
+    protected int compare(String first, String second) {
+        return Integer.compare(first.compareTo(second), 0);
     }
 
     private void merge(File firstFile, File secondFile, File outputFile) throws IOException {
@@ -52,7 +69,7 @@ public class StringSort {
         long a = 0, b = 0, len = len_1 + len_2;
         for (long i = 0; i < len; i++) {
             if (b < len_2 && a < len_1) {
-                if (compareWithDirection(firstFile, a, secondFile, b)) {
+                if (!compareWithDirection(firstFile, a, secondFile, b)) {
                     writeToFile(outputFile, getSpecificString(secondFile, b));
                     b++;
                 } else {
@@ -149,7 +166,18 @@ public class StringSort {
     }
 
     private boolean compareWithDirection(File firstFile, Long index1, File secondFile, Long index2) throws IOException {
-        return compare(getSpecificString(firstFile, index1), getSpecificString(secondFile, index2)) == ascending;
+
+        int compared = compare(getSpecificString(firstFile, index1), getSpecificString(secondFile, index2));
+
+        if (ascending) {
+            if (compared == 0) {
+                return true;
+            } else return compared != 1;
+        } else {
+            if (compared == 0) {
+                return true;
+            } else return compared != -1;
+        }
     }
 
 }

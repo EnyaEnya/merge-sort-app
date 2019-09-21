@@ -7,7 +7,7 @@ public class NumberSort extends StringSort {
     }
 
     @Override
-    protected boolean compare(String first, String second) {
-        return Long.parseLong(first) >= Long.parseLong(second);
+    protected int compare(String first, String second) {
+        return Long.compare(Long.parseLong(first), Long.parseLong(second));
     }
 }
