@@ -27,11 +27,9 @@ public class StringSort {
             File newFile = new File(UUID.randomUUID().toString() + ".txt");
             try {
                 FileUtils.touch(newFile);
+                FileUtils.copyFile(file, newFile);
                 if (!isSorted(file)) {
-                    File sortedFile = sort(file);
-                    FileUtils.copyFile(sortedFile, newFile);
-                } else {
-                    FileUtils.copyFile(file, newFile);
+                    sort(newFile);
                 }
                 return newFile;
             } catch (IOException e) {
@@ -107,10 +105,9 @@ public class StringSort {
         return tempFile;
     }
 
-    private File sort(File file) {
+    private void sort(File file) {
         try {
             FileUtils.copyFile(recursiveSort(file), file);
-            return file;
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException();
