@@ -2,11 +2,9 @@ package com.enya;
 
 import org.apache.commons.cli.ParseException;
 
-import java.io.IOException;
-
 public class Main {
 
-    public static void main(String[] args) throws ParseException, IOException {
+    static void sort(String[] args) throws ParseException {
 
         ArgParser argParser = new ArgParser();
 
@@ -20,9 +18,16 @@ public class Main {
             sortInstance = new NumberSort(sortParams.isAscendingDirection());
         }
 
-        sortInstance.mergeFiles(sortParams.getFileList(), sortParams.getOutputFile());
+        sortInstance.mergeFiles(sortParams.getFileSet(), sortParams.getOutputFile());
 
+    }
 
+    public static void main(String[] args) {
+        try {
+            sort(args);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
 }

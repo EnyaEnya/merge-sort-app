@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -22,8 +23,8 @@ public class StringSort {
         this.tempFiles = new ArrayList<>();
     }
 
-    public void mergeFiles(List<File> fileList, File outputFile) {
-        fileList.stream().map(file -> {
+    public void mergeFiles(Set<File> fileSet, File outputFile) {
+        fileSet.stream().map(file -> {
             File newFile = new File(UUID.randomUUID().toString() + ".txt");
             try {
                 FileUtils.touch(newFile);

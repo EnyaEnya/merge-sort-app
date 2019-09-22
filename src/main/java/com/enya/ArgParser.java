@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ArgParser {
@@ -65,12 +66,12 @@ public class ArgParser {
         return outputFile;
     }
 
-    private List<File> getInputFiles(List<String> cmdArgs) {
-        List<File> fileList = cmdArgs.stream().skip(1).map(File::new).filter(File::exists).collect(Collectors.toList());
-        if (fileList.size() == 0) {
+    private Set<File> getInputFiles(List<String> cmdArgs) {
+        Set<File> fileSet = cmdArgs.stream().skip(1).map(File::new).filter(File::exists).collect(Collectors.toSet());
+        if (fileSet.size() == 0) {
             throw new RuntimeException(); //todo custom exception
         }
-        return fileList;
+        return fileSet;
     }
 
 }

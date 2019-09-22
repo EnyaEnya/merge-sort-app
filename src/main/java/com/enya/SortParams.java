@@ -2,19 +2,24 @@ package com.enya;
 
 
 import java.io.File;
-import java.util.List;
+import java.util.Set;
 
 public class SortParams {
 
     private boolean ascendingDirection;
     private boolean stringType;
-    private List<File> fileList;
+    private Set<File> fileSet;
     private File outputFile;
 
-    SortParams(boolean ascendingDirection, boolean stringType, List<File> fileList, File outputFile) {
+    SortParams(boolean ascendingDirection, boolean stringType, Set<File> fileSet, File outputFile) {
+
+        if (fileSet.contains(outputFile)) {
+            throw new RuntimeException();
+        }
+
         this.ascendingDirection = ascendingDirection;
         this.stringType = stringType;
-        this.fileList = fileList;
+        this.fileSet = fileSet;
         this.outputFile = outputFile;
     }
 
@@ -26,8 +31,8 @@ public class SortParams {
         return stringType;
     }
 
-    public List<File> getFileList() {
-        return fileList;
+    public Set<File> getFileSet() {
+        return fileSet;
     }
 
     public File getOutputFile() {
