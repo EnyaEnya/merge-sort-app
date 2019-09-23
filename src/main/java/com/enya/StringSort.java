@@ -1,15 +1,14 @@
 package com.enya;
 
+import com.enya.exceptions.WrongStringIndexException;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class StringSort {
@@ -23,34 +22,51 @@ public class StringSort {
         this.tempFiles = new ArrayList<>();
     }
 
-    public void mergeFiles(Set<File> fileSet, File outputFile) {
-        fileSet.stream().map(file -> {
-            File newFile = new File(UUID.randomUUID().toString() + ".txt");
-            try {
-                FileUtils.touch(newFile);
-                FileUtils.copyFile(file, newFile);
-                if (!isSorted(file)) {
-                    sort(newFile);
+    public void mergeFiles(Set<File> fileSet, File outputFile) throws IOException {
+        prepareOutputFile(outputFile);
+        Set<File> newFileSet = new HashSet<>();
+        try {
+            fileSet.stream().map(file -> {
+                File newFile = new File(UUID.randomUUID().toString() + ".txt");
+                newFileSet.add(newFile);
+                try {
+                    FileUtils.touch(newFile);
+                    FileUtils.copyFile(file, newFile);
+                    if (!isSorted(file)) {
+                        sort(newFile);
+                    }
+                    return newFile;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-                return newFile;
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new RuntimeException();
-            }
-        }).peek(file -> {
-            try {
-                mergeWithAcc(file, outputFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).forEach(FileUtils::deleteQuietly);
+            }).forEach(file -> {
+                try {
+                    mergeWithAcc(file, outputFile);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+            });
+        } finally {
+            newFileSet.forEach(FileUtils::deleteQuietly);
+        }
+    }
+
+    private void prepareOutputFile(File outputFile) throws IOException {
+        FileUtils.touch(outputFile);
+        FileUtils.write(outputFile, "", Charset.defaultCharset());
     }
 
     private boolean isSorted(File file) throws IOException {
         boolean sorted = false;
         long length = countString(file);
+
+        if (length < 2) {
+            return true;
+        }
+
         for (long i = 0; i < length - 1; i++) {
-            if (compareWithDirection(file, i,file, i + 1)) {
+            if (compareWithDirection(file, i, file, i + 1)) {
                 sorted = true;
             } else {
                 return false;
@@ -96,22 +112,15 @@ public class StringSort {
         }
     }
 
-    private File createTempFile() {
+    private File createTempFile() throws IOException {
         File tempFile = new File("temp.txt");
-        try {
-            FileUtils.touch(tempFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        FileUtils.touch(tempFile);
         return tempFile;
     }
 
-    private void sort(File file) {
+    private void sort(File file) throws IOException {
         try {
             FileUtils.copyFile(recursiveSort(file), file);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
         } finally {
             tempFiles.forEach(FileUtils::deleteQuietly);
             tempFiles.clear();
@@ -149,7 +158,7 @@ public class StringSort {
     private String getSpecificString(File file, long stringNumber) throws IOException {
         String specificLine;
         try (Stream<String> lines = Files.lines(file.toPath())) {
-            specificLine = lines.skip(stringNumber).findFirst().orElseThrow(RuntimeException::new); //todo custom exception
+            specificLine = lines.skip(stringNumber).findFirst().orElseThrow(WrongStringIndexException::new); //todo custom exception
         }
         return specificLine;
     }

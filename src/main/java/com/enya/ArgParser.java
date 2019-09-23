@@ -1,10 +1,11 @@
 package com.enya;
 
+import com.enya.exceptions.InputFilesContainOutputFileException;
+import com.enya.exceptions.NoInputFilesException;
+import com.enya.exceptions.NoOutputFileException;
 import org.apache.commons.cli.*;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,7 +32,14 @@ public class ArgParser {
             stringType = false;
         }
 
-        return new SortParams(ascending, stringType, getInputFiles(cmd.getArgList()), getOutputFile(cmd.getArgList()));
+        File outputFile = getOutputFile(cmd.getArgList());
+        Set<File> inputFiles = getInputFiles(cmd.getArgList());
+
+        if (inputFiles.contains(outputFile)) {
+            throw new InputFilesContainOutputFileException();
+        }
+
+        return new SortParams(ascending, stringType, inputFiles, outputFile);
 
     }
 
@@ -56,20 +64,16 @@ public class ArgParser {
     }
 
     private File getOutputFile(List<String> cmdArgs) {
-        File outputFile = new File(cmdArgs.get(0));
-        try {
-            FileUtils.touch(outputFile);
-            FileUtils.write(outputFile, "", Charset.defaultCharset());  //todo check encoding
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(cmdArgs.size() > 0) {
+            return new File(cmdArgs.get(0));
         }
-        return outputFile;
+        throw new NoOutputFileException();
     }
 
     private Set<File> getInputFiles(List<String> cmdArgs) {
         Set<File> fileSet = cmdArgs.stream().skip(1).map(File::new).filter(File::exists).collect(Collectors.toSet());
         if (fileSet.size() == 0) {
-            throw new RuntimeException(); //todo custom exception
+            throw new NoInputFilesException();
         }
         return fileSet;
     }

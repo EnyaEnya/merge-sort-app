@@ -12,11 +12,6 @@ public class SortParams {
     private File outputFile;
 
     SortParams(boolean ascendingDirection, boolean stringType, Set<File> fileSet, File outputFile) {
-
-        if (fileSet.contains(outputFile)) {
-            throw new RuntimeException();
-        }
-
         this.ascendingDirection = ascendingDirection;
         this.stringType = stringType;
         this.fileSet = fileSet;
