@@ -19,6 +19,9 @@ mvn clean install
 
 Then run merge-sort-app.jar with parameters.
 
+
+## Examples
+
 Integer ascending sort:
 ```
 Java -jar merge-sort-app.jar -i -a out.txt in.txt
@@ -29,5 +32,5 @@ Java -jar merge-sort-app.jar -s out.txt in1.txt in3.txt
 ```
 String descending sort:
 ```
-Java -jar merge-sort-app.jar -s out.txt in1.txt in3.txt
+Java -jar merge-sort-app.jar -d -s out.txt in1.txt in3.txt
 ```
