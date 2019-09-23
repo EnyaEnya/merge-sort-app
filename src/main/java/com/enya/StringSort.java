@@ -58,7 +58,6 @@ public class StringSort {
     }
 
     private boolean isSorted(File file) throws IOException {
-        boolean sorted = false;
         long length = countString(file);
 
         if (length < 2) {
@@ -66,13 +65,11 @@ public class StringSort {
         }
 
         for (long i = 0; i < length - 1; i++) {
-            if (compareWithDirection(file, i, file, i + 1)) {
-                sorted = true;
-            } else {
+            if (!compareWithDirection(file, i, file, i + 1)) {
                 return false;
             }
         }
-        return sorted;
+        return true;
     }
 
     protected int compare(String first, String second) {
@@ -158,18 +155,14 @@ public class StringSort {
     private String getSpecificString(File file, long stringNumber) throws IOException {
         String specificLine;
         try (Stream<String> lines = Files.lines(file.toPath())) {
-            specificLine = lines.skip(stringNumber).findFirst().orElseThrow(WrongStringIndexException::new); //todo custom exception
+            specificLine = lines.skip(stringNumber).findFirst().orElseThrow(WrongStringIndexException::new);
         }
         return specificLine;
     }
 
-    private void writeToFile(File file, String recordedValue) {
+    private void writeToFile(File file, String recordedValue) throws IOException {
         String newRecordedValue = recordedValue + "\n";
-        try {
-            Files.write(file.toPath(), newRecordedValue.getBytes(), StandardOpenOption.APPEND);
-        } catch (IOException e) {
-            System.out.println(e);
-        }
+        Files.write(file.toPath(), newRecordedValue.getBytes(), StandardOpenOption.APPEND);
     }
 
     private boolean compareWithDirection(File firstFile, Long index1, File secondFile, Long index2) throws IOException {
