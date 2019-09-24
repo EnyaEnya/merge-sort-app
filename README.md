@@ -7,7 +7,7 @@ This application allows you to sort text files and write result to another.
 This is not required parameter, application will apply ascending sort by default; 
 - Data type (-i for integer, -s for string). This is required parameter;
 - Name of output file. This is required parameter;
-- Names of input files. At least one exists file is required;
+- Names of input files. At least one existing file is required;
 
 ## First App run
 
@@ -28,9 +28,9 @@ Java -jar merge-sort-app.jar -i -a out.txt in.txt
 ```
 String ascending sort:
 ```
-Java -jar merge-sort-app.jar -s out.txt in1.txt in3.txt
+Java -jar merge-sort-app.jar -s out.txt in1.txt in2.txt in3.txt
 ```
 String descending sort:
 ```
-Java -jar merge-sort-app.jar -d -s out.txt in1.txt in3.txt
+Java -jar merge-sort-app.jar -d -s out.txt in1.txt in2.txt
 ```
